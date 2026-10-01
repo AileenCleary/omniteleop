@@ -9,6 +9,13 @@ __all__ = [
     "leader_arm_main",
     "JoyConReader",
     "joycon_main",
-    "PaddleLeader",
-    "paddle_main",
 ]
+
+try:
+    from .paddle_leader import PaddleLeader as PaddleLeader, main as paddle_main
+except ModuleNotFoundError as exc:
+    if exc.name != "dexstream":
+        raise
+else:
+    __all__ += ["PaddleLeader", "paddle_main"]
+
