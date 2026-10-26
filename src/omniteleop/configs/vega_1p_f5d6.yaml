@@ -21,12 +21,21 @@ input_handlers:
         motor_ids: [101, 102, 103, 104, 105, 106, 107]  # Exoskeleton motor IDs
         # Polarity corrections for each motor (1 or -1)
         motor_polarities: [1, 1, 1, -1, 1, 1, 1]  # Motor 104 (4th motor) is inverted
+        # Additive zero corrections (radians), applied after polarity. Set a joint's
+        # value to (robot_pos - exo_pos) from command_processor's [ALIGN] log to null a
+        # fixed mechanical bias. All zero here -- left arm has no known offset.
+        motor_offsets: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         # These joint names are for the FOLLOWER robot that will be controlled
         follower_joint_names: ["L_arm_j1", "L_arm_j2", "L_arm_j3", "L_arm_j4", "L_arm_j5", "L_arm_j6", "L_arm_j7"]
       right_arm:
         motor_ids: [1, 2, 3, 4, 5, 6, 7]  # Exoskeleton motor IDs
         # Polarity corrections for each motor (1 or -1)
         motor_polarities: [1, 1, 1, 1, 1, 1, 1]  # All motors normal polarity
+        # Additive zero corrections (radians), applied after polarity. Motor 4 (elbow)
+        # reads a constant ~1.12 rad low vs the robot from a mechanical mount/horn
+        # offset; +1.123 nulls it. Tune from command_processor's [ALIGN] j4 log:
+        # offset += (robot_pos - exo_pos) until diff falls under the 1.0 rad gate.
+        motor_offsets: [0.0, 0.0, 0.0, 1.123, 0.0, 0.0, 0.0]
         # These joint names are for the FOLLOWER robot that will be controlled
         follower_joint_names: ["R_arm_j1", "R_arm_j2", "R_arm_j3", "R_arm_j4", "R_arm_j5", "R_arm_j6", "R_arm_j7"]
 

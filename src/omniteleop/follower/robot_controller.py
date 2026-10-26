@@ -302,7 +302,7 @@ class RobotController:
                 cmd_pos = np.array(gen.out.new_position)
 
                 if component == "torso":
-                    self.robot.torso.move_to_joint_pos(cmd_pos)
+                    self.robot.torso.set_joint_pos(cmd_pos)
                 elif component in {"left_arm", "right_arm"}:
                     getattr(self.robot, component).set_joint_pos(cmd_pos, wait_time=0.0)
 
@@ -425,7 +425,7 @@ class RobotController:
         """Send torso directly to its home position (no planning)."""
         if not (self.has_torso and "torso" in self.home_positions):
             return
-        self.robot.torso.move_to_joint_pos(
+        self.robot.torso.set_joint_pos(
             self.home_positions["torso"],
         )
 
@@ -937,7 +937,7 @@ class RobotController:
         if "right_arm" in components:
             arm_commands["right_arm"] = components["right_arm"]["pos"]
         if arm_commands:
-            self.robot.move_to_joint_pos(arm_commands)
+            self.robot.set_joint_pos(arm_commands)
 
     def _send_base_command(self, base_data: Dict):
         """Send command to mobile base.
@@ -958,7 +958,7 @@ class RobotController:
             torso_data: Dictionary with position and velocity.
         """
         # logger.info(f'Debugging interploration_method: {self.interpolation_method} and torso_data: {torso_data}')
-        self.robot.torso.move_joint_pos(
+        self.robot.torso.set_joint_pos(
             torso_data["pos"],
         )
 
@@ -985,7 +985,7 @@ class RobotController:
         if arm is not None:
             if "pos" in arm_data:
                 positions = arm_data["pos"]
-                arm.move_joint_pos(positions, velocity_scale=1.0)
+                arm.set_joint_pos(positions)
 
     def _send_hand_command(self, hand_name: str, hand_data: Dict):
         """Send command to hand.

@@ -376,10 +376,13 @@ class LeaderArmReader:
         velocities: List[float] = []
         motor_ids = arm_config.get("motor_ids", [])
         motor_polarities = arm_config.get("motor_polarities", [1] * len(motor_ids))
+        # Additive zero corrections (radians), applied after polarity. Use for a fixed
+        # mechanical mount/horn offset on a joint that reads a constant bias vs the robot.
+        motor_offsets = arm_config.get("motor_offsets", [0.0] * len(motor_ids))
 
         for i, motor_id in enumerate(motor_ids):
             position_rad, velocity_rad_s = self._read_motor_data(
-                motor_id, i, motor_polarities
+                motor_id, i, motor_polarities, motor_offsets
             )
             positions.append(position_rad)
             velocities.append(velocity_rad_s)
@@ -387,7 +390,11 @@ class LeaderArmReader:
         return positions, velocities
 
     def _read_motor_data(
-        self, motor_id: int, motor_index: int, motor_polarities: List[int]
+        self,
+        motor_id: int,
+        motor_index: int,
+        motor_polarities: List[int],
+        motor_offsets: Optional[List[float]] = None,
     ) -> Tuple[float, float]:
         """Read position and velocity data for a single motor.
 
@@ -395,6 +402,9 @@ class LeaderArmReader:
             motor_id: ID of the motor to read
             motor_index: Index of the motor in the arm
             motor_polarities: List of polarity corrections
+            motor_offsets: List of additive position offsets (radians), applied
+                after polarity. Position only -- a constant offset has zero
+                derivative, so velocity is left untouched.
 
         Returns:
             Tuple of (position in radians, velocity in rad/s)
@@ -417,6 +427,11 @@ class LeaderArmReader:
             if motor_index < len(motor_polarities):
                 position_rad *= motor_polarities[motor_index]
                 velocity_rad_s *= motor_polarities[motor_index]
+
+            # Apply additive zero correction (radians), after polarity. Position
+            # only: a constant offset does not affect velocity.
+            if motor_offsets is not None and motor_index < len(motor_offsets):
+                position_rad += motor_offsets[motor_index]
 
         except Exception as e:
             logger.warning(f"Error reading motor {motor_id}: {e}")
