@@ -10,10 +10,10 @@ __all__ = [
     "joycon_main",
 ]
 
-# paddle_leader pulls in the VR stack (dexstream), which is optional and absent on
-# exo/JoyCon-only hosts (e.g. the Jetson). Guard it so `import omniteleop.leader`
-# still works without VR. Match any dexstream submodule, not just the top package:
-# the failing import is `dexstream.retargeting`, whose exc.name is that submodule.
+# paddle_leader pulls in the optional VR stack (dexstream), absent on exo/JoyCon-only
+# hosts (e.g. the Jetson). Guard it so `import omniteleop.leader` still works without
+# VR. Match on the top-level package name (exc.name is "dexstream.retargeting", not
+# "dexstream"). See vega_module/.docs/CODE_PATCHES.md.
 try:
     from .paddle_leader import PaddleLeader as PaddleLeader, main as paddle_main
 except ModuleNotFoundError as exc:
