@@ -223,6 +223,10 @@ class RobotController:
         logger.info("Initializing robot hardware...")
         self.robot = Robot()
 
+        # Pin subscribers always_on so idle chassis readbacks don't pause and make
+        # the first base command eat a resume gap. See vega_module/.docs/CODE_PATCHES.md.
+        self.robot.set_subscription_policy("always_on")
+
         # Parse home positions from config (no hardware movement)
         self._parse_home_positions()
         
